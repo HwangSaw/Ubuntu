@@ -2,6 +2,7 @@
 #include<stdlib.h>
 int main(int argc, char *argv[])
 {
+    // launch.json 의 인자 argv 테스트  "args": ["9190"],
     int temp = 0;
     int temp2 = 1;
     printf("argv[0] %s \n", argv[0]);

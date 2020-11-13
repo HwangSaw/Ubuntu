@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
         error_handling("read() error!");
     
     printf("Message from server : %s \n", message);
-    close(sock); // 데이터 수신 이후에 close 함수호출을 통해서 소켓을 닫고 있다. 따라서 서버와의 연결은 종료 된다. 
+    close(sock); // 데이터 수신 이후에 close 함수호출을 통해서 소켓을 닫고 있다. 따라서 서버와의 연결은 종료 
     
     return 0;
 }
