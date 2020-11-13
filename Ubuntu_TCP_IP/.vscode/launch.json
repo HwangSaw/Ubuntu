@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": ["127.0.0.1", "9190"],
+            "args": ["9190"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -19,6 +19,7 @@
                 {
                     "description": "gdb에 자동 서식 지정 사용",
                     "text": "-enable-pretty-printing",
+                    
                     "ignoreFailures": true
                 }
             ],
