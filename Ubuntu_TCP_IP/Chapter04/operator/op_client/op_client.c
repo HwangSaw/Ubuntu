@@ -6,16 +6,38 @@
 #include<sys/socket.h>
 
 #define BUF_SIZE 1024
+#define INT_SIZE 4
+#define CHAR_SIZE 1
 
-
-
+//  - 클라이언트는 서버에 접속하자마자 피연산자의 개수정보를 
+// 1바이트 정수형태로 전달한다
+// - 클라이언트가 서버에 전달하는 정수하나는 4바이트로 표현한다.
+// - 정수를 전달한 다음에는 연산의 종류를 전달한다. 연산정보는 1바이트로 전달한다
+// - 문자 +, - ,* 중 하나를 선택해서 전달한다.
+// - 서버는 연산결과를 4바이트 정수의 형태로 클라이언트에 전달한다
+// - 연산결과르 ㄹ얻은 클라이언트는 서버와의 연결을 종료한다. 
 void error_handling(char *message);
+void ReadUntillFullData(int sock, char* pointRef, int byteSize)
+{
+    int recv_len = 0;
+    int recv_cnt = 0;
+    while(recv_len < byteSize)
+    {
+        recv_cnt = read(sock, pointRef +recv_len, byteSize);
+        if(recv_cnt == -1)
+            error_handling("read() error");
+        recv_len += recv_cnt;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     int sock;
     char message[BUF_SIZE];
-    int str_len, recv_len, recv_cnt;
+    int  recv_len, recv_cnt;
     struct sockaddr_in serv_adr;
+    int getServerResult;
+    
 
     if(argc != 3)
     {
@@ -36,56 +58,41 @@ int main(int argc, char* argv[])
         error_handling("connect() error");
     else
         puts("Connected.........................");
-
     
     puts("Operand count:");
-    int count;
-    scanf("%d", &count);
+    char count;
+    scanf("%c", &count);
+    write(sock, &count, sizeof(count));
+    count = atoi(&count);
+    printf("input num : %c %d ", count, count);
 
-    // 강제로 1로한다 지금은 테스트라서 
-    count = 1;
     for(int i = 0; i<count; i++)
     {
         printf("Operand %d :", i+1);
         int number = 11;
-        fputs("숫자 테스트 : \n", stdout);
         scanf("%d",&number);
-        printf("test %d ", number);
+        printf("test %d  \n", number);
+        write(sock, (char*)&number, sizeof(number));        
 
-        str_len = write(sock, (char*)&number, sizeof(number));
-
-
-        recv_len = 0;
-        int getServerValue;
-        while(recv_len < sizeof(int))
-        {
-            recv_cnt = read(sock, (char*)(&getServerValue+recv_len), sizeof(int));
-            if(recv_cnt == -1)
-                error_handling("read() error");
-            recv_len += recv_cnt;
-
-        }
-        
-        printf("Message from server: %d ", getServerValue);
-        
+        printf(" i : %d , count :%d \n",i, count);
     }
-    close(sock);
 
-/*
+    puts("Operator: ");
+    char operator;
+    scanf("%c", &operator);
+    write(sock, &operator, sizeof(operator));
+
     recv_len = 0;
-        while(recv_len < str_len)
-        {
-            recv_cnt = read(sock, &message[recv_len], BUF_SIZE -1);
-            if(recv_cnt == -1)
-                error_handling("read() error");
+    int getServerValue;
+    ReadUntillFullData(sock, (char*)&getServerValue, sizeof(int));
 
-            recv_len += recv_cnt;
-        }
-    */
-
+    printf("Message from server: %d ", getServerValue);
+    close(sock);
 
     return 0;
 }
+
+// 해당 바이트 만큼 주소값에 데이터 read 하는 함수
 
 void error_handling(char *message)
 {

@@ -6,12 +6,13 @@
 #include<sys/socket.h>
 
 #define BUF_SIZE 1024
-void error_handling(char *message);
+void error_handling(const char *message);
+void ReadUntillFullData(int sock, char* pointRef, int byteSize);
+
 int main(int argc, char* argv[])
 {
     int serv_sock, clnt_sock;
     char message[BUF_SIZE];
-    int str_len, i;
 
     struct sockaddr_in serv_adr, clnt_adr;
     socklen_t clnt_adr_sz;
@@ -48,14 +49,28 @@ int main(int argc, char* argv[])
         printf("connected client %d \n", 1);
     
     // 클라가준 인트값 먼저 한게 읽자
-    int clientIntValue;  
-    str_len = read(clnt_sock, &clientIntValue, sizeof(int) );
-    printf("str_len %d", str_len);
-
-    printf("clientIntValue %d", clientIntValue);
+    char clientCount;  
+    ReadUntillFullData(clnt_sock, &clientCount, sizeof(clientCount));
     
+    clientCount = atoi(&clientCount);
+    printf("clientCharCountValue %d", clientCount);
+
+    int *intArray = (int*)malloc(sizeof(int) * clientCount);
+
+    
+    for(int i=0; i<clientCount; i++)
+    {
+        ReadUntillFullData(clnt_sock, (char*)&intArray[i], sizeof(int));
+    }
+
+    char operator1;
+    ReadUntillFullData(clnt_sock, &operator1, sizeof(operator1));
+
+    printf("clientGetOperator %c", operator1);
+
+
     int serverReturnValue = 1004;
-    write(clnt_sock, &serverReturnValue, sizeof(4));
+    write(clnt_sock, &serverReturnValue, sizeof(int));
 
     close(clnt_sock);
     close(serv_sock);
@@ -63,7 +78,20 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void error_handling(char *message)
+void ReadUntillFullData(int sock, char* pointRef, int byteSize)
+{
+    int recv_len = 0;
+    int recv_cnt = 0;
+    while(recv_len < byteSize)
+    {
+        recv_cnt = read(sock, pointRef + recv_len, byteSize);
+        if(recv_cnt == -1)
+            error_handling("read() error");
+        recv_len += recv_cnt;
+    }
+}
+
+void error_handling(const char *message)
 {
     fputs(message, stderr);
     fputc('\n', stderr);
