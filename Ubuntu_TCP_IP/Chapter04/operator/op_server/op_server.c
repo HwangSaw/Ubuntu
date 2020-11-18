@@ -8,6 +8,7 @@
 #define BUF_SIZE 1024
 void error_handling(const char *message);
 void ReadUntillFullData(int sock, char* pointRef, int byteSize);
+int operatorFunc(int result, int second, char operatorChar);
 
 int main(int argc, char* argv[])
 {
@@ -39,9 +40,6 @@ int main(int argc, char* argv[])
 
     clnt_adr_sz = sizeof(clnt_adr);
 
-
-    // 일단 한개 클라만 받아서 인트형 받아서 무조건 1004 반환 해줘보자 
-
     clnt_sock = accept(serv_sock, (struct sockaddr*)&clnt_adr, &clnt_adr_sz);
     if(clnt_sock == -1)
         error_handling("accept() error");
@@ -52,30 +50,53 @@ int main(int argc, char* argv[])
     char clientCount;  
     ReadUntillFullData(clnt_sock, &clientCount, sizeof(clientCount));
     
-    clientCount = atoi(&clientCount);
-    printf("clientCharCountValue %d", clientCount);
+    printf("clientCharCountValue %d \n" , clientCount);
 
     int *intArray = (int*)malloc(sizeof(int) * clientCount);
-
     
     for(int i=0; i<clientCount; i++)
     {
         ReadUntillFullData(clnt_sock, (char*)&intArray[i], sizeof(int));
+        printf("client get intValue: %d \n ", intArray[i]);
     }
 
     char operator1;
     ReadUntillFullData(clnt_sock, &operator1, sizeof(operator1));
+    printf("clientGetOperator %c \n", operator1);
 
-    printf("clientGetOperator %c", operator1);
+    int firstValue = intArray[0];
+    for(int i=1; i<clientCount; i++)
+    {
+        firstValue = operatorFunc(firstValue, intArray[i], operator1);
 
+    }
 
-    int serverReturnValue = 1004;
+    int serverReturnValue = firstValue;
     write(clnt_sock, &serverReturnValue, sizeof(int));
 
     close(clnt_sock);
     close(serv_sock);
 
     return 0;
+}
+
+int operatorFunc(int result, int second, char operatorChar)
+{
+    if(operatorChar == '+')
+    {
+        return result + second;
+    }else if(operatorChar == '-')
+    {
+        return result - second;
+    }else if(operatorChar == '*')
+    {
+        return result * second;
+    }else
+    {
+        error_handling("operatorChar is error");
+        return 0;
+    }
+    
 }
 
 void ReadUntillFullData(int sock, char* pointRef, int byteSize)

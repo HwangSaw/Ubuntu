@@ -16,19 +16,8 @@
 // - 문자 +, - ,* 중 하나를 선택해서 전달한다.
 // - 서버는 연산결과를 4바이트 정수의 형태로 클라이언트에 전달한다
 // - 연산결과르 ㄹ얻은 클라이언트는 서버와의 연결을 종료한다. 
-void error_handling(char *message);
-void ReadUntillFullData(int sock, char* pointRef, int byteSize)
-{
-    int recv_len = 0;
-    int recv_cnt = 0;
-    while(recv_len < byteSize)
-    {
-        recv_cnt = read(sock, pointRef +recv_len, byteSize);
-        if(recv_cnt == -1)
-            error_handling("read() error");
-        recv_len += recv_cnt;
-    }
-}
+void error_handling(const char *message);
+void ReadUntillFullData(int sock, char* pointRef, int byteSize);
 
 int main(int argc, char* argv[])
 {
@@ -62,8 +51,8 @@ int main(int argc, char* argv[])
     puts("Operand count:");
     char count;
     scanf("%c", &count);
-    write(sock, &count, sizeof(count));
     count = atoi(&count);
+    write(sock, &count, sizeof(count));
     printf("input num : %c %d ", count, count);
 
     for(int i = 0; i<count; i++)
@@ -77,10 +66,10 @@ int main(int argc, char* argv[])
         printf(" i : %d , count :%d \n",i, count);
     }
 
-    puts("Operator: ");
-    char operator;
-    scanf("%c", &operator);
-    write(sock, &operator, sizeof(operator));
+    printf("Operator: ");
+    char operator1;
+    scanf("%c", &operator1);
+    write(sock, &operator1, sizeof(operator1));
 
     recv_len = 0;
     int getServerValue;
@@ -92,9 +81,21 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+void ReadUntillFullData(int sock, char* pointRef, int byteSize)
+{
+    int recv_len = 0;
+    int recv_cnt = 0;
+    while(recv_len < byteSize)
+    {
+        recv_cnt = read(sock, pointRef +recv_len, byteSize);
+        if(recv_cnt == -1)
+            error_handling("read() error");
+        recv_len += recv_cnt;
+    }
+}
 // 해당 바이트 만큼 주소값에 데이터 read 하는 함수
 
-void error_handling(char *message)
+void error_handling(const char *message)
 {
     fputs(message, stderr);
     fputc('\n', stderr);
