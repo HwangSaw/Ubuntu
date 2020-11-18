@@ -48,34 +48,31 @@ int main(int argc, char* argv[])
     else
         puts("Connected.........................");
     
-    puts("Operand count:");
+    printf("Operand count: ");
     char count;
-    scanf("%c", &count);
+    scanf(" %c", &count);
     count = atoi(&count);
     write(sock, &count, sizeof(count));
-    printf("input num : %c %d ", count, count);
 
     for(int i = 0; i<count; i++)
     {
-        printf("Operand %d :", i+1);
+        printf("Operand %d : ", i+1);
         int number = 11;
-        scanf("%d",&number);
-        printf("test %d  \n", number);
-        write(sock, (char*)&number, sizeof(number));        
-
-        printf(" i : %d , count :%d \n",i, count);
+        scanf(" %d",&number);
+ 
+        write(sock, (char*)&number, sizeof(number));
     }
 
     printf("Operator: ");
-    char operator1;
-    scanf("%c", &operator1);
-    write(sock, &operator1, sizeof(operator1));
+    char strTestOperator = '+';
+    scanf(" %c",&strTestOperator);
 
-    recv_len = 0;
+    write(sock, &strTestOperator, sizeof(strTestOperator));
+
     int getServerValue;
     ReadUntillFullData(sock, (char*)&getServerValue, sizeof(int));
 
-    printf("Message from server: %d ", getServerValue);
+    printf("Operation result: %d \n", getServerValue);
     close(sock);
 
     return 0;
